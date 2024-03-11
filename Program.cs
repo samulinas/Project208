@@ -1,7 +1,10 @@
-﻿using Project208.Image;
+﻿//using Project208.Image;
 using System.Numerics;
 using System.Text;
-using System.Xml.Linq;
+//Cтатичний імпорт класів
+using static Project208.Calculation;
+//Використання псевдонімів
+using Bint = System.Numerics.BigInteger;
 
 namespace Project208;
 internal class Program
@@ -31,10 +34,10 @@ internal class Program
 		const int in2 = 20; // Константа
 		var va1 = "World"; // Неявна типізація
 
-		BigInteger bi1 = BigInteger.Parse("45446744073709551615000");
-		BigInteger bi2 = BigInteger.Parse("10000000000000000000000");
+		Bint bi1 = Bint.Parse("45446744073709551615000");
+		Bint bi2 = Bint.Parse("10000000000000000000000");
 		Console.WriteLine(bi1 + bi2); // 55446744073709551615000
-		BigInteger bi3 = BigInteger.Multiply(17, BigInteger.Pow(10, 307));
+		Bint bi3 = Bint.Multiply(17, Bint.Pow(10, 307));
 
 		Console.WriteLine(bi3); // 170000...
 
@@ -339,50 +342,204 @@ internal class Program
 		person1.Position = "Worker";
 		Console.WriteLine(person1.Position);
 		person1.Age = 19;
+
+		Console.WriteLine("\n=============== Класи та об'єкти ===============\n");
 		Animal animal1 = new Animal("Cat", 3);
 		animal1.PrintAnimal();
 		Cat cat1 = new Cat("Cat", "Murka", 5);
 		cat1.PrintAnimal();
 		cat1.Rename("Vasya");
+		Animal animal2 = new Animal();
+		animal2.PrintAnimal();
+		Console.WriteLine(Add(10, 9));
+		Console.WriteLine(Sub(10, 9));
+		Console.WriteLine(Div(10, 9));
+		Console.WriteLine(Mult(10, 9));
+		cat1.Move();
+
+		Console.WriteLine("\n=============== Перевантаження операторів ===============\n");
+		Box b1 = new Box(10, 60);
+		Box b2 = new Box(10, 10);
+		Console.WriteLine($"Висота: {b1.Height}, Ширина: {b1.Width}");
+		Console.WriteLine($"Висота: {b2.Height}, Ширина: {b2.Width}");
+		Box b3 = b1 + b2;
+		Box b4 = b1 - b2;
+		Console.WriteLine($"Висота: {b3.Height}, Ширина: {b3.Width}");
+		Console.WriteLine($"Висота: {b4.Height}, Ширина: {b4.Width}");
+
+		Console.WriteLine("\n=============== Узагальнення ===============\n");
+		string a1 = "5px"; 
+		string a2 = "7px";
+		Console.WriteLine(a1 + " " + a2);
+		Swap.GetSwap<string>(ref a1, ref a2);
+		Console.WriteLine(a1 + " " + a2);
+
+		Stacks<string> stack1 = new Stacks<string>();
+		Stacks<int> stack2 = new Stacks<int>();
+
+		string fname1 = "Ivan", fname2 = "Oleg", fname3 = "John";
+		stack1.Add(fname1);
+		stack1.Add(fname2);
+		stack1.Add(fname3);
+		stack1.GetArray();
+		stack1.Rename();
+		stack1.Add(fname1);
+		stack1.GetArray();
+		stack1.GetItem(1);
+
+		int n1 = 24, n2 = 35, n3 = 12;
+		stack2.Add(n1);
+		stack2.Add(n2);
+		stack2.GetItem(0);
+		stack2.GetArray();
+		stack2.Add(n3);
+		stack2.GetArray();
+
+		Console.WriteLine("\n=============== Колекції ===============\n");
+		List<int> ints = [10, 46, 8];
+		ints.Add(15);
+		for (int i = 0; i < ints.Count; i++) Console.Write($"{ints[i]} ");
+		Console.WriteLine();
+		ints.Sort();
+		ints.Reverse();
+		ints.RemoveAt(0);
+		ints.Remove(8);
+		ints.Clear();
+		ints.Add(4);
+		for (int i = 0; i < ints.Count; i++) Console.Write($"{ints[i]} ");
+		Console.WriteLine();
+
+		SortedList<int, string> sints = new SortedList<int, string>
+		{
+			{ 96, "Ivan" },
+			{ 45, "Oleg" },
+			{ 18, "Jonh" }
+		};
+		sints.Remove(18);
+		foreach (int i in sints.Keys) Console.Write($"{i} ");
+		Console.WriteLine();
+		foreach (string i in sints.Values) Console.Write($"{i} ");
+
+		Console.WriteLine("\n=============== Файли ===============\n");
+		string? s1 = Console.ReadLine();
+		File.WriteAllText("text.txt", s1);
+		Console.WriteLine($"В файл text.txt дані ({File.ReadAllText("text.txt")}) було записано!");
+		File.AppendAllText("text.txt", " ");
+		File.AppendAllText("text.txt", Console.ReadLine());
+		Console.WriteLine($"Оновлений файл: {File.ReadAllText("text.txt")}");
+
+		Console.WriteLine("\n=============== Обробка виключень ===============\n");
+		int[] array = { 10, 15 };
+		try
+		{
+			Console.WriteLine(array[1]);
+		}
+		catch (Exception e)
+		{
+			Console.WriteLine($"Помилка: {e.Message} Ви вийшли за діапазон масиву!");
+		}
+		finally 
+		{
+			Console.WriteLine(array[1]);
+		}
+		Console.ReadKey();
 	}
-	enum Operation : sbyte { None = -1, Exit = 0, Add = 1, Sub, Mult, Div }
+}
+class Stacks<Type> {
+	private int index = 0;
+	Type[] innerArr = new Type[10];
+	public void Add(Type item) {
+		if (index >= innerArr.Length) {
+			index = 0;
+		}
+		innerArr[index++] = item;
+	}
+	public Type Rename()
+	{
+		Console.WriteLine($"Елемент {innerArr[--index]} будe у масиві перезаписано!");
+		return innerArr[index];
+	}
+	public Type GetItem(int i) 
+	{
+		Console.WriteLine(innerArr[i]);
+		return innerArr[i]; 
+	}
+	public void GetArray()
+	{
+		for (int i = 0; i < index; i++) {
+			Console.Write($"{innerArr[i]} ");
+		}
+		Console.WriteLine();
+	}
+}
+static class Swap {
+	public static void GetSwap<Type>(ref Type a, ref Type b) {
+		Type temp = a;
+		a = b; 
+		b = temp;
+	}
+}
+class Box { 
+	public double Height { get; set; }
+	public double Width { get; set; }
+	public Box(double height, double width) { 
+		Height = height; 
+		Width = width;	
+	}
+	public static Box operator+ (Box box1, Box box2) {
+		double h = box1.Height + box2.Height;
+		double w = box1.Width + box2.Width;
+		Box box = new Box(h, w);
+		return box;
+	}
+	public static Box operator- (Box box1, Box box2)
+	{
+		double h = box1.Height - box2.Height;
+		double w = box1.Width - box2.Width;
+		Box box = new Box(h, w);
+		return box;
+	}
+}
+enum Operation : sbyte { None = -1, Exit = 0, Add = 1, Sub, Mult, Div }
 
-	struct Person {
-		//Поля
-		private string _name;
+struct Person
+{
+	//Поля
+	private string _name = "No Name";
 
-		//Автоматична властивість
-		public int Age { get; set; }
+	//Автоматична властивість
+	public int Age { get; set; }
 
-		//Методи
-		public void Print() 
-		{
-			Console.WriteLine($"Name: {_name}, age: {Age}");
-		}
-		//Стрілочний метод
-		public void SetName(string name) => _name = name;
+	//Методи
+	public void Print()
+	{
+		Console.WriteLine($"Name: {_name}, age: {Age}");
+	}
+	//Стрілочний метод
+	public void SetName(string name) => _name = name;
 
-		//Властивості
-		public string Position { 
-			get { return _name; }
-			set { _name = value; }
-		}
-		//Перевантажений метод
-		public void Print(string title1, string title2)
-		{
-			Console.WriteLine($"{title1}: {_name}, {title2}: {Age}");
-		}
-		//Конструктор
-		public Person(string name, int age) 
-		{
-			_name = name;
-			Age = age;
-		}
-		//Деконструктор
-		public void Deconstruct(out string name, out int age) {
-			name = _name;
-			age = Age;
-		}
+	//Властивості
+	public string Position
+	{
+		get { return _name; }
+		set { _name = value; }
+	}
+	//Перевантажений метод
+	public void Print(string title1, string title2)
+	{
+		Console.WriteLine($"{title1}: {_name}, {title2}: {Age}");
+	}
+	//Конструктор
+	public Person(string name, int age)
+	{
+		_name = name;
+		Age = age;
+	}
+	//Деконструктор
+	public void Deconstruct(out string name, out int age)
+	{
+		name = _name;
+		age = Age;
 	}
 }
 public class Animal
@@ -401,7 +558,7 @@ public class Animal
 		Console.WriteLine($"{_type} {_age}");
 	}
 }
-public class Cat : Animal {
+public class Cat : Animal, IMovable {
 	private string _name;
 	public override void PrintAnimal()
 	{
@@ -416,4 +573,16 @@ public class Cat : Animal {
 	public Cat(string type, string name, int age) : base(type, age) {
 		_name = name;
 	}
+	public void Move() {
+		Console.WriteLine("Кішка рухається!");
+	}
+}
+static class Calculation { 
+	static public int Add(int x, int y) => x + y;
+	static public int Sub(int x, int y) => x - y;
+	static public int Mult(int x, int y) => x * y;
+	static public double Div(int x, int y) => Convert.ToDouble(x) / y;
+}
+interface IMovable {
+	public void Move();
 }

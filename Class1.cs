@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Project208;
 
-namespace Project208.Image
+namespace Project208
 {
-	public class Class1
-	{
-		Animal animal1 = new Animal();
-	}
+    public class Class1
+    {
+        Animal animal1 = new Animal();
+    }
 
 }
