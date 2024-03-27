@@ -1,4 +1,7 @@
 ﻿//using Project208.Image;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.Design.Serialization;
+using System.Data.SqlTypes;
 using System.Numerics;
 using System.Text;
 //Cтатичний імпорт класів
@@ -419,30 +422,209 @@ internal class Program
 		foreach (int i in sints.Keys) Console.Write($"{i} ");
 		Console.WriteLine();
 		foreach (string i in sints.Values) Console.Write($"{i} ");
+		Console.WriteLine();
+
+		Dictionary<string, int> d1 = new Dictionary<string, int>
+		{
+			{ "Банани", 20 },
+			{ "Яблука", 35 },
+			{ "Апельсини", 5 }
+		};
+		foreach (string i in d1.Keys) Console.Write($"{i} ");
+		Console.WriteLine();
+		if (d1.ContainsKey("Апельсини")) Console.WriteLine($"Фрукт у наявності, в кількості {d1["Апельсини"]}!");
+		Console.WriteLine();
+
+		SortedDictionary<string, int> d2 = new SortedDictionary<string, int>
+		{
+			{ "Банани", 20 },
+			{ "Яблука", 35 },
+			{ "Апельсини", 5 }
+		};
+		foreach (string i in d2.Keys) Console.Write($"{i} ");
+		Console.WriteLine();
 
 		Console.WriteLine("\n=============== Файли ===============\n");
-		string? s1 = Console.ReadLine();
-		File.WriteAllText("text.txt", s1);
-		Console.WriteLine($"В файл text.txt дані ({File.ReadAllText("text.txt")}) було записано!");
-		File.AppendAllText("text.txt", " ");
-		File.AppendAllText("text.txt", Console.ReadLine());
-		Console.WriteLine($"Оновлений файл: {File.ReadAllText("text.txt")}");
+		//string? s1 = Console.ReadLine();
+		//File.WriteAllText("text.txt", s1);
+		//Console.WriteLine($"В файл text.txt дані ({File.ReadAllText("text.txt")}) було записано!");
+		//File.AppendAllText("text.txt", " ");
+		//File.AppendAllText("text.txt", Console.ReadLine());
+		//Console.WriteLine($"Оновлений файл: {File.ReadAllText("text.txt")}");
+		
 
 		Console.WriteLine("\n=============== Обробка виключень ===============\n");
 		int[] array = { 10, 15 };
 		try
 		{
-			Console.WriteLine(array[1]);
+			if (array[1] == 15) throw new Exception("Елемент за індексом 1 дорівнює 15");
 		}
 		catch (Exception e)
 		{
-			Console.WriteLine($"Помилка: {e.Message} Ви вийшли за діапазон масиву!");
+			Console.WriteLine($"Помилка: {e.Message}.");
 		}
 		finally 
 		{
-			Console.WriteLine(array[1]);
+			Console.WriteLine(array[0]);
 		}
 		Console.ReadKey();
+
+		Console.WriteLine("\n=============== Абстрактні класи ===============\n");
+		Client client1 = new Client("Ivan");
+		Employee empl1 = new Employee("John", "Касир");
+		client1.Display();
+		empl1.Display();
+
+		Console.WriteLine("\n=============== Інтерфейси ===============\n");
+		client1.Put(2000);
+		client1.Withdraw(800);
+		client1.Display();
+		VipClient vp = new VipClient("Jonh");
+		vp.Display();
+		ISchool vp2 = new VipClient("Oleg");
+		vp2.Study();
+		IUniversity vp3 = new VipClient("Petr");
+		vp3.Study();
+
+		Console.WriteLine("\n=============== Кортежі ===============\n");
+		var adminname = (2, "Hello", number: 10);
+		adminname.number += 10;
+		Console.WriteLine(adminname);
+		Console.WriteLine(adminname.Item1);
+		Console.WriteLine(adminname.Item2);
+		Console.WriteLine(adminname.number);
+		(int, int) GetValue(int a, int b) {
+			var value = (a, b);
+			int i1 = value.Item1 + value.Item2;
+			int i2 = value.Item1 * value.Item2;
+			return (i1, i2);
+		}
+		Console.WriteLine(GetValue(2, 3));
+
+		Console.WriteLine("\n=============== Делегати ===============\n");
+		Message msg = new Message(DisplayHello);
+		msg.Invoke();
+		Calc cl = Add;
+		cl += Multiply;
+		cl.Invoke(7, 5);
+		DoCalc(2, 4, Add);
+		DoCalc(2, 4, Multiply);
+
+		Console.WriteLine("\n=============== Шаблонні делегати ===============\n");
+		Action act1 = DisplayHello;
+		act1();
+		Action<string> act2 = Display;
+		act2("World!");
+		Action<int> act3 = DisplayDigit;
+		act3 += DisplayDigit;
+		act3(70);
+		Predicate<int> pre1 = Logical;
+		Console.WriteLine(pre1(5));
+		Func<int, int, int> func = Add;
+		func += Multiply;
+		func(7, 5);
+	}
+
+	delegate void Message(); // Action
+	delegate int Calc(int a, int b); // Func
+	delegate bool Logi(int a); // Predicate
+	static void DoCalc(int a, int b, Calc cl) { 
+		cl.Invoke(a, b);
+	}
+	static bool Logical(int a)
+	{
+		bool b1 = Convert.ToBoolean(a);
+		return b1;
+	}
+	static void DisplayHello() {
+		Console.WriteLine("Hello");
+	}
+	static void DisplayDigit(int a)
+	{
+		Random random = new Random();
+		Console.WriteLine(random.Next(a));
+	}
+	static void Display(string str)
+	{
+		Console.WriteLine(str);
+	}
+	static int Add(int a, int b) {
+		Console.WriteLine(a + b);
+		return a + b; 
+	}
+	static int Multiply(int a, int b)
+	{
+		Console.WriteLine(a * b);
+		return a * b;
+	}
+}
+
+interface ISchool {
+	void Study();
+}
+interface IUniversity
+{
+	void Study();
+}
+interface IAccount {
+	public int Money { get; }
+	void Put(int sum);
+	void Withdraw(int sum);
+}
+abstract class Human {
+	public string? FullName { get; set; }
+	public abstract void Display();
+	public Human(string name)
+	{
+		FullName = name;
+	}
+}
+class Client : Human, IAccount
+{
+	private int _money = 0;
+	public int Money { get => _money; }
+
+	public override void Display() {
+		Console.WriteLine($"Повне ім'я: {FullName}. Кількість коштів на рахунку: {Money}");
+	}
+
+	public void Put(int sum)
+	{
+		_money += sum;
+	}
+
+	public void Withdraw(int sum)
+	{
+		if (_money >= sum) _money -= sum;
+	}
+
+	public Client(string name) : base (name) 
+	{ 
+	}
+}
+class VipClient : Client, ISchool, IUniversity {
+	public VipClient(string name) : base(name)
+	{
+	}
+	void ISchool.Study()
+	{
+		Console.WriteLine("Vip клієнт навчається у школі!");
+	}
+	void IUniversity.Study()
+	{
+		Console.WriteLine("Vip клієнт навчається в університеті!");
+	}
+}
+class Employee : Human
+{
+	public string? Position { get; set; }
+	public override void Display()
+	{
+		Console.WriteLine($"Повне ім'я: {FullName}. Посада робітника: {Position}");
+	}
+	public Employee(string name, string position) : base(name)
+	{
+		Position = position;
 	}
 }
 class Stacks<Type> {
@@ -502,7 +684,7 @@ class Box {
 }
 enum Operation : sbyte { None = -1, Exit = 0, Add = 1, Sub, Mult, Div }
 
-struct Person
+struct Person 
 {
 	//Поля
 	private string _name = "No Name";
